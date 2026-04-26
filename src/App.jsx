@@ -1,13 +1,18 @@
-import ProductCard from "./components/productCard"
+// import { Routes, Route } from 'react-router-dom'
+// import HomePage from './pages/home.jsx'
+// import LoginPage from './pages/login.jsx'
+// import AdminPage from './pages/admin.jsx'
+import Test from './components/test.jsx'
 
-function App() {
-
+export default function App() {
   return (
-    <>
-      <ProductCard className = "bg-blue-500 text-black"/>
-      <ProductCard />
-    </>
+    <Test />
+    // <div className="w-full h-screen">
+    //     <Routes>
+    //         <Route path="/" element={<HomePage/>}/>
+    //         <Route path="/login" element={<LoginPage/>}/>
+    //         <Route path="/admin/*" element={<AdminPage/>}/>
+    //     </Routes>
+    // </div>
   )
 }
-
-export default App
