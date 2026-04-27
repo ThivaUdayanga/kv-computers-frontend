@@ -9,7 +9,7 @@ export default function Test() {
     return (
         <div className="w-full h-screen flex justify-center items-center">
           <button 
-            className="w-[50px] h-[50px] bg-amber-950 text-white" 
+            className="w-[50px] h-[50px] bg-amber-950 text-white rounded-full" 
             onClick={
               () =>{
                 setIsVisible(!isVissible)

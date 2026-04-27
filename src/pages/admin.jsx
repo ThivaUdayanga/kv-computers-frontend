@@ -1,21 +1,25 @@
 import {Link, Routes, Route} from 'react-router-dom';
+import { MdOutlineFeaturedPlayList } from "react-icons/md";
+import { MdProductionQuantityLimits } from "react-icons/md";
+import { BiUser } from "react-icons/bi";
+import AdminOrdersPage from './admin/adminOrdersPage.jsx';
+import AdminProductsPage from './admin/adminProductsPage.jsx';
+import AdminUsersPage from './admin/adminUsersPage.jsx';
 
 export default function AdminPage() {
     return(
-        <div className = "w-full h-screen bg-gray-400 flex flex-raw">
-            <div className="w-[300px] h-full bg-amber-300 flex flex-col">
-                {/* <a href="/admin/">Orders</a>
-                <a href="/admin/products">Products</a>
-                <a href="/admin/users">Users</a> */}
-                <Link to="/admin/">Orders</Link>
-                <Link to="/admin/products">Products</Link>
-                <Link to="/admin/users">Users</Link>
+        <div className = "w-full h-screen bg-accent flex flex-raw">
+            <div className="w-[300px] h-full bg-accent flex flex-col">
+                <h1 className="text-2xl font-bold text-primary p-[13px]">Admin Panel</h1>
+                <Link className="border flex flex-row items-center p-[13px] gap-3 mb-[3px] mt-[30px] hover:bg-secondary hover:text-primary" to="/admin/"><MdOutlineFeaturedPlayList />Orders</Link>
+                <Link className="border flex flex-row items-center p-[13px] gap-3 mb-[3px] hover:bg-secondary hover:text-primary" to="/admin/products"><MdProductionQuantityLimits />Products</Link>
+                <Link className="border flex flex-row items-center p-[13px] gap-3 mb-[3px] hover:bg-secondary hover:text-primary" to="/admin/users"><BiUser />Users</Link>
             </div>
-            <div className="w-[calc(100%-300px)] h-full bg-amber-900">
+            <div className="w-[calc(100%-300px)] h-full bg-primary border-2 border-accent rounded-lg p-4">
                 <Routes>
-                    <Route path="/" element={<h1>Orders Page</h1>}/>
-                    <Route path="/products" element={<h1>Products Page</h1>}/>
-                    <Route path="/users" element={<h1>Users Page</h1>}/>
+                    <Route path="/" element={<AdminOrdersPage />}/>
+                    <Route path="/products" element={<AdminProductsPage />}/>
+                    <Route path="/users" element={<AdminUsersPage />}/>
                 </Routes>
             </div>
             
