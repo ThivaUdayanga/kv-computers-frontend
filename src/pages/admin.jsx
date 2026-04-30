@@ -5,6 +5,7 @@ import { BiUser } from "react-icons/bi";
 import AdminOrdersPage from './admin/adminOrdersPage.jsx';
 import AdminProductsPage from './admin/adminProductsPage.jsx';
 import AdminUsersPage from './admin/adminUsersPage.jsx';
+import AdminAddProduct from './admin/adminAddProductsPage.jsx';
 
 export default function AdminPage() {
     return(
@@ -20,6 +21,7 @@ export default function AdminPage() {
                     <Route path="/" element={<AdminOrdersPage />}/>
                     <Route path="/products" element={<AdminProductsPage />}/>
                     <Route path="/users" element={<AdminUsersPage />}/>
+                    <Route path="/products/add-product" element={<AdminAddProduct/>}/>
                 </Routes>
             </div>
             

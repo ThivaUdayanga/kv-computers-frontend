@@ -2,7 +2,6 @@ import { Routes, Route } from 'react-router-dom'
 import HomePage from './pages/home.jsx'
 import LoginPage from './pages/login.jsx'
 import AdminPage from './pages/admin.jsx'
-import AdminAddProduct from './pages/admin/adminAddProductsPage.jsx'
 import { Toaster } from 'react-hot-toast'
 
 export default function App() {
@@ -13,7 +12,6 @@ export default function App() {
             <Route path="/" element={<HomePage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/admin/*" element={<AdminPage/>}/>
-            <Route path="/admin/add-product" element={<AdminAddProduct/>}/>
         </Routes>
     </div>
   )
