@@ -3,6 +3,7 @@ import HomePage from './pages/home.jsx'
 import LoginPage from './pages/login.jsx'
 import AdminPage from './pages/admin.jsx'
 import { Toaster } from 'react-hot-toast'
+// import Test from './components/test.jsx'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
             <Route path="/" element={<HomePage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/admin/*" element={<AdminPage/>}/>
+            {/* <Route path="/" element={<Test/>}/> */}
         </Routes>
     </div>
   )

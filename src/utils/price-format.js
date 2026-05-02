@@ -10,7 +10,7 @@ export default function getFormatedPrice(price) {
         return "N/A"
     }else{
 
-        return "LKR :" + priceInNumber.
+        return "LKR :"+ priceInNumber.
             toLocaleString('en-US', { 
                 minimumFractionDigits:2, 
                 maximumFractionDigits:2 

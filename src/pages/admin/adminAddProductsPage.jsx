@@ -2,33 +2,42 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { fileUpload } from "../../utils/media-upload";
 
 export default function AdminAddProduct() {
+    const navigate = useNavigate();
 
-    const navigate = useNavigate()
+    const [productId, setProductId] = useState("");
+    const [productName, setProductName] = useState("");
+    const [productDescription, setProductDescription] = useState("");
+    const [altName, setAltName] = useState("");
+    const [productPrice, setProductPrice] = useState("");
+    const [labelPrice, setLabelPrice] = useState("");
+    const [category, setCategory] = useState("");
+    const [isVissible, setIsVissible] = useState("isVissible");
+    const [brand, setBrand] = useState("Standard");
+    const [model, setModel] = useState("Generic");
+    const [files, setFiles] = useState([]);
 
-    const [productId, setProductId] = useState("")
-    const [productName, setProductName] = useState("")
-    const [productDescription, setProductDescription] = useState("")
-    const [altName, setAltName] = useState("")
-    const [productPrice, setProductPrice] = useState("")
-    const [labelPrice, setLabelPrice] = useState("")
-    const [category, setCategory] = useState("")
-    const [isVissible, setIsVissible] = useState("isVissible")
-    const [brand, setBrand] = useState("Standard")
-    const [model, setModel] = useState("Generic")
-
-    async function handleAddProduct () {
+    async function handleAddProduct() {
         try {
-            const token = localStorage.getItem("token")
+            const token = localStorage.getItem("token");
 
-            if(token == null){
-                toast.error("You must be logged in to add a product.")
-                window.location.href = "/login"
-                return
+            if (token == null) {
+                toast.error("You must be logged in to add a product.");
+                window.location.href = "/login";
+                return;
             }
 
-            await axios.post(import.meta.env.VITE_API_URL +"/products", {
+            const fileUploadPromisses = [];
+
+            for(let i=0 ; i<files.length ; i++){
+                fileUploadPromisses[i] = fileUpload(files[i]);
+            }
+
+            const imageUrls = await Promise.all(fileUploadPromisses);
+
+            await axios.post(import.meta.env.VITE_API_URL + "/products", {
                 productId: productId,
                 productName: productName,
                 productDescription: productDescription,
@@ -38,188 +47,230 @@ export default function AdminAddProduct() {
                 category: category,
                 status: isVissible,
                 brand: brand,
-                model: model
+                model: model,
+                images: imageUrls
             }, {
                 headers: {
-                    Authorization: "Bearer "+token
+                    Authorization: "Bearer " + token
                 }
-            })
-            toast.success("Product added successfully!")
+            });
 
-            // rederect to Admin/products
+            toast.success("Product added successfully!");
+
+            // Redirect to Admin/products
             navigate("/admin/products");
 
         } catch (error) {
-            toast.error(error?.response?.data?.message ||"Failed to add product. Please try again.")
-            return
+            toast.error(error?.response?.data?.message || "Failed to add product. Please try again.");
+            return;
         }
     }
 
+    const inputClass =
+        "mt-2 w-full rounded-xl border border-accent/50 bg-primary px-4 py-3 text-sm text-secondary outline-none transition placeholder:text-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/10";
+
+    const labelClass =
+        "text-sm font-semibold text-secondary";
+
+    const fieldClass =
+        "flex flex-col";
+
     return (
-            <div className="w-full max-h-full flex flex-wrap p-4 overflow-y-scroll">
-                <h1 className="w-full text-3xl font-bold mb-4 text-secondary sticky top-0 bg-primary">Add Product</h1>
-                <div className="w-[50%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Product ID</label>
-                    <input 
-                        placeholder="Ex: ID0001" 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={productId}
-                        onChange={
-                            (e) => {
-                                setProductId(e.target.value)
-                            }
-                        } 
-                    />
-                </div> 
-                <div className="w-[50%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Product Name</label>
-                    <input 
-                        placeholder="Ex: Laptop" 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={productName}
-                        onChange={
-                            (e) => {
-                                setProductName(e.target.value)
-                            }
-                        } 
-                    />
-                </div>          
-                <div className="w-[100%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Product Description</label>
-                    <textarea
-                        placeholder="Ex: High-performance laptop for gaming" 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={productDescription}
-                        onChange={
-                            (e) => {
-                                setProductDescription(e.target.value)
-                            }
-                        } 
-                    />
+        <div className="flex h-full w-full flex-col overflow-hidden rounded-md bg-primary">
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                {/* Header */}
+                <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm border border-accent/30 sticky top-0">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-accent">
+                        Product Management
+                    </p>
+
+                    <h1 className="mt-1 text-3xl font-bold text-secondary">
+                        Add Product
+                    </h1>
+
+                    <p className="mt-2 text-sm text-secondary/60">
+                        Fill in the product details below to add a new item to the store.
+                    </p>
                 </div>
-                <div className="w-[100%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Alternative Product Name</label>
-                    <input 
-                        placeholder="Ex: Gaming Laptop" 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={altName}
-                        onChange={
-                            (e) => {
-                                setAltName(e.target.value)
-                            }
-                        } 
-                    />
-                </div> 
-                <div className="w-[50%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Price</label>
-                    <input 
-                        placeholder="LKR 150,000" 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={productPrice}
-                        onChange={
-                            (e) => {
-                                setProductPrice(e.target.value)
-                            }
-                        } 
-                    />
+
+                {/* Form Card */}
+                <div className="rounded-2xl bg-white p-6 shadow-md border border-accent/30">
+                    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Product ID</label>
+                            <input
+                                placeholder="Ex: ID0001"
+                                className={inputClass}
+                                value={productId}
+                                onChange={(e) => {
+                                    setProductId(e.target.value);
+                                }}
+                            />
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Product Name</label>
+                            <input
+                                placeholder="Ex: Laptop"
+                                className={inputClass}
+                                value={productName}
+                                onChange={(e) => {
+                                    setProductName(e.target.value);
+                                }}
+                            />
+                        </div>
+
+                        <div className="flex flex-col lg:col-span-2">
+                            <label className={labelClass}>Product Description</label>
+                            <textarea
+                                placeholder="Ex: High-performance laptop for gaming"
+                                className="mt-2 min-h-[120px] w-full resize-none rounded-xl border border-accent/50 bg-primary px-4 py-3 text-sm text-secondary outline-none transition placeholder:text-secondary/40 focus:border-secondary focus:ring-2 focus:ring-secondary/10"
+                                value={productDescription}
+                                onChange={(e) => {
+                                    setProductDescription(e.target.value);
+                                }}
+                            />
+                        </div>
+
+                        <div className="flex flex-col lg:col-span-2">
+                            <label className={labelClass}>Images</label>
+                            <input
+                                type="file"
+                                multiple
+                                placeholder="Sample image"
+                                onChange={(e) => {
+                                    setFiles(e.target.files);
+                                }}
+                            />
+                            <p className="mt-1 text-xs text-secondary/45">
+                                Upload Multiple images.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col lg:col-span-2">
+                            <label className={labelClass}>Alternative Product Names</label>
+                            <input
+                                placeholder="Ex: Gaming Laptop, Office Laptop"
+                                className={inputClass}
+                                value={altName}
+                                onChange={(e) => {
+                                    setAltName(e.target.value);
+                                }}
+                            />
+                            <p className="mt-1 text-xs text-secondary/45">
+                                Separate multiple names using commas.
+                            </p>
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Price</label>
+                            <input
+                                placeholder="LKR 150,000"
+                                className={inputClass}
+                                value={productPrice}
+                                onChange={(e) => {
+                                    setProductPrice(e.target.value);
+                                }}
+                            />
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Product Label Price</label>
+                            <input
+                                placeholder="LKR 180,000"
+                                className={inputClass}
+                                value={labelPrice}
+                                onChange={(e) => {
+                                    setLabelPrice(e.target.value);
+                                }}
+                            />
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Category</label>
+                            <select
+                                className={inputClass}
+                                value={category}
+                                onChange={(e) => {
+                                    setCategory(e.target.value);
+                                }}
+                            >
+                                <option value="">Select a category</option>
+                                <option value="laptops">Laptops</option>
+                                <option value="desktops">Desktops</option>
+                                <option value="accessories">Accessories</option>
+                            </select>
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Status</label>
+                            <select
+                                className={inputClass}
+                                value={isVissible}
+                                onChange={(e) => {
+                                    setIsVissible(e.target.value);
+                                }}
+                            >
+                                <option value="available">Visible</option>
+                                <option value="not-available">Not Visible</option>
+                            </select>
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Brand</label>
+                            <select
+                                className={inputClass}
+                                value={brand}
+                                onChange={(e) => {
+                                    setBrand(e.target.value);
+                                }}
+                            >
+                                <option value="">Select a brand</option>
+                                <option value="standard">Standard</option>
+                                <option value="premium">Premium</option>
+                                <option value="pro">Pro</option>
+                            </select>
+                        </div>
+
+                        <div className={fieldClass}>
+                            <label className={labelClass}>Model</label>
+                            <select
+                                className={inputClass}
+                                value={model}
+                                onChange={(e) => {
+                                    setModel(e.target.value);
+                                }}
+                            >
+                                <option value="">Select a model</option>
+                                <option value="generic">Generic</option>
+                                <option value="pro">Pro</option>
+                                <option value="ultra">Ultra</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div className="w-[50%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Product Label Price</label>
-                    <input 
-                        placeholder="LKR 150,000" 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={labelPrice}
-                        onChange={
-                            (e) => {
-                                setLabelPrice(e.target.value)
-                            }
-                        } 
-                    />
-                </div>
-                <div className="w-[25%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Category</label>
-                    <select 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={category}
-                        onChange={
-                            (e) => {
-                                setCategory(e.target.value)
-                            }
-                        }
-                    >
-                        <option value="">Select a category</option>
-                        <option value="laptops">Laptops</option>
-                        <option value="desktops">Desktops</option>
-                        <option value="accessories">Accessories</option>
-                    </select>
-                </div>
-                <div className="w-[25%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Status</label>
-                    <select 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={isVissible}
-                        onChange={
-                            (e) => {
-                                setIsVissible(e.target.value)
-                            }
-                        }
-                    >
-                        <option value="available">Vissible</option>
-                        <option value="not-available">Not Vissible</option>
-                    </select>
-                </div>
-                <div className="w-[25%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Brand</label>
-                    <select 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={brand}
-                        onChange={
-                            (e) => {
-                                setBrand(e.target.value)
-                            }
-                        }
-                    >
-                        <option value="">Select a brand</option>
-                        <option value="standard">Standard</option>
-                        <option value="premium">Premium</option>
-                        <option value="pro">Pro</option>
-                    </select>
-                </div>
-                <div className="w-[25%] h-[90px] flex flex-col">
-                    <label className=" text-secondary font-bold ml-2">Model</label>
-                    <select 
-                        className="w-full border-2 border-accent rounded-[10px] p-3 m-2 focus:outline-white"
-                        value={model}
-                        onChange={
-                            (e) => {
-                                setModel(e.target.value)
-                            }
-                        }
-                    >
-                        <option value="">Select a model</option>
-                        <option value="generic">Generic</option>
-                        <option value="pro">Pro</option>
-                        <option value="ultra">Ultra</option>
-                    </select>
-                </div>
-                <div className="w-full h-[100px] mt-5 sticky bottom-0 flex flex-row gap-2 justify-end items-center p-4">
-                    <button 
-                        className="w-[150px] h-[50px] bg-primary border border-secondary text-secondary font-bold py-2 px-4 rounded-[10px] hover:bg-accent focus:outline-none"
-                        onClick={
-                            () => {
-                                navigate("/admin/products");
-                            }
-                        }
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="border-t border-accent/30 bg-white px-6 py-4">
+                <div className="flex justify-end gap-3">
+                    <button
+                        className="h-[48px] w-[140px] rounded-xl border border-secondary bg-white text-sm font-bold text-secondary transition hover:bg-primary"
+                        onClick={() => {
+                            navigate("/admin/products");
+                        }}
                     >
                         Cancel
                     </button>
-                    <button 
-                        className="w-[150px] h-[50px] bg-accent text-secondary font-bold py-2 px-4 rounded-[10px] hover:bg-secondary hover:text-primary focus:outline-none"
+
+                    <button
+                        className="h-[48px] w-[150px] rounded-xl bg-secondary text-sm font-bold text-primary shadow-md transition hover:bg-accent hover:text-secondary"
                         onClick={handleAddProduct}
                     >
                         Add Product
                     </button>
                 </div>
+            </div>
         </div>
-    )
+    );
 }

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   FaPlus, 
   FaSearch, 
@@ -10,89 +10,8 @@ import {
 } from "react-icons/fa";
 import getFormatedPrice from "../../utils/price-format";
 import getFormattedDiscount from "../../utils/discount-format";
-
-const sampleProducts = [
-  {
-    productId: "P001",
-    productName: "Wireless Bluetooth Headphones",
-    productDescription: "High-quality wireless headphones with noise cancellation.",
-    altName: ["Bluetooth Headset", "Wireless Headphones"],
-    productPrice: 79.99,
-    labelPrice: 99.99,
-    category: "Electronics",
-    images: [
-      "https://example.com/images/headphones1.jpg",
-      "https://example.com/images/headphones2.jpg",
-    ],
-    isVisible: true,
-    brand: "SoundMax",
-    model: "X200",
-  },
-  {
-    productId: "P002",
-    productName: "Smart Fitness Watch",
-    productDescription: "Track your health metrics and daily activities.",
-    altName: ["Fitness Tracker", "Smart Watch"],
-    productPrice: 49.99,
-    labelPrice: 69.99,
-    category: "Wearables",
-    images: [
-      "https://example.com/images/watch1.jpg",
-      "https://example.com/images/watch2.jpg",
-    ],
-    isVisible: true,
-    brand: "FitPro",
-    model: "F10",
-  },
-  {
-    productId: "P003",
-    productName: "Gaming Mechanical Keyboard",
-    productDescription: "RGB mechanical keyboard with blue switches.",
-    altName: ["Gaming Keyboard", "Mechanical Keyboard"],
-    productPrice: 59.99,
-    labelPrice: 79.99,
-    category: "Accessories",
-    images: [
-      "https://example.com/images/keyboard1.jpg",
-      "https://example.com/images/keyboard2.jpg",
-    ],
-    isVisible: false,
-    brand: "KeyForce",
-    model: "MK-87",
-  },
-  {
-    productId: "P004",
-    productName: "Portable Power Bank 20000mAh",
-    productDescription: "Fast charging power bank with dual USB ports.",
-    altName: ["Power Bank", "Portable Charger"],
-    productPrice: 29.99,
-    labelPrice: 39.99,
-    category: "Accessories",
-    images: [
-      "https://example.com/images/powerbank1.jpg",
-      "https://example.com/images/powerbank2.jpg",
-    ],
-    isVisible: true,
-    brand: "ChargePlus",
-    model: "PB20K",
-  },
-  {
-    productId: "P005",
-    productName: "4K Ultra HD Smart TV 55 inch",
-    productDescription: "Crystal clear 4K display with built-in streaming apps.",
-    altName: ["Smart TV", "4K TV"],
-    productPrice: 499.99,
-    labelPrice: 599.99,
-    category: "Home Entertainment",
-    images: [
-      "https://example.com/images/tv1.jpg",
-      "https://example.com/images/tv2.jpg",
-    ],
-    isVisible: true,
-    brand: "ViewTech",
-    model: "VT55UHD",
-  },
-];
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 // Category color map for badge variety
 const categoryColors = {
@@ -103,17 +22,76 @@ const categoryColors = {
 };
 
 export default function AdminProductsPage() {
-  const [products] = useState(sampleProducts);
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          toast.error("You must be logged in to view products.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(
+          import.meta.env.VITE_API_URL + "/products",
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
+        );
+
+        console.log("Products API response:", response.data);
+
+        let productList = [];
+
+        if (Array.isArray(response.data)) {
+          productList = response.data;
+        } else if (Array.isArray(response.data.products)) {
+          productList = response.data.products;
+        } else if (Array.isArray(response.data.data)) {
+          productList = response.data.data;
+        } else {
+          console.error("Invalid products response format:", response.data);
+          toast.error("Invalid product data received from server.");
+        }
+
+        setProducts(productList);
+      } catch (error) {
+        console.error("Fetch products error:", error);
+
+        toast.error(
+          error?.response?.data?.message ||
+            "Failed to fetch products. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
+  }, []);
+
   const [search, setSearch] = useState("");
 
-  const filtered = products.filter(
-    (p) =>
-      p.productName.toLowerCase().includes(search.toLowerCase()) ||
-      p.brand.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase())
-  );
+  const safeProducts = Array.isArray(products) ? products : [];
 
-  const visibleCount = products.filter((p) => p.isVisible).length;
+  const filtered = safeProducts.filter((p) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      p.productName?.toLowerCase().includes(searchText) ||
+      p.brand?.toLowerCase().includes(searchText) ||
+      p.category?.toLowerCase().includes(searchText)
+    );
+  });
+
+  const visibleCount = safeProducts.filter((p) => p.isVisible).length;
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-y-scroll rounded-md bg-primary">
@@ -133,12 +111,11 @@ export default function AdminProductsPage() {
       {/* ── Stat Cards ── */}
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { label: "Total Products", value: products.length, icon: <FaBoxOpen /> },
-          { label: "Visible", value: visibleCount, icon: <FaEye /> },
-          { label: "Hidden", value: products.length - visibleCount, icon: <FaEyeSlash /> },
+          { label: "Total Products", value: safeProducts.length, icon: <FaBoxOpen /> },
+          { label: "Hidden", value: safeProducts.length - visibleCount, icon: <FaEyeSlash /> },
           {
             label: "Categories",
-            value: [...new Set(products.map((p) => p.category))].length,
+            value: [...new Set(safeProducts.map((p) => p.category))].length,
             icon: <FaTag />,
           },
         ].map((stat) => (
@@ -285,7 +262,7 @@ export default function AdminProductsPage() {
 
         {/* Footer */}
         <div className="border-t border-primary/20 px-6 py-3 text-xs text-secondary/40">
-          Showing {filtered.length} of {products.length} products
+          Showing {filtered.length} of {safeProducts.length} products
         </div>
       </div>
 
