@@ -20,9 +20,14 @@ export function fileUpload(file){
                 upsert:false,
                 cacheControl:"3600"
             }).then(
-                ()=>{
-                    const url = supabase.storage.from("images").getPublicUrl(fileName).data.publicUrl
-                    resolve(url)
+                ({ data, error })=>{
+                    if(error){
+                        reject(error.message || "File upload failed")
+                        return
+                    }else{
+                        const url = supabase.storage.from("images").getPublicUrl(fileName).data.publicUrl
+                        resolve(url)
+                    }
                 }
             ).catch(
                 (err)=>{

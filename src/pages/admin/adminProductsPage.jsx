@@ -8,10 +8,13 @@ import {
   FaEye, 
   FaEyeSlash 
 } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import getFormatedPrice from "../../utils/price-format";
 import getFormattedDiscount from "../../utils/discount-format";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import DeleteModel from "../../components/deleteModel"
 
 // Category color map for badge variety
 const categoryColors = {
@@ -25,6 +28,7 @@ export default function AdminProductsPage() {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -75,7 +79,10 @@ export default function AdminProductsPage() {
     }
 
     fetchProducts();
-  }, []);
+  }, [
+    //Dependent array
+    refresh
+  ]);
 
   const [search, setSearch] = useState("");
 
@@ -158,7 +165,7 @@ export default function AdminProductsPage() {
           <table className="w-full min-w-[860px] border-collapse text-left text-sm">
             <thead>
               <tr className="bg-secondary/5 text-secondary/60">
-                {["Product ID", "Product", "Price", "Discount", "Category", "Brand / Model", "Status"].map(
+                {["Product ID", "Image", "Product", "Price", "Discount", "Category", "Brand / Model", "Status", "Actions"].map(
                   (h) => (
                     <th
                       key={h}
@@ -174,7 +181,7 @@ export default function AdminProductsPage() {
             <tbody className="divide-y divide-primary/20">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-16 text-center text-secondary/40">
+                  <td colSpan={9} className="py-16 text-center text-secondary/40">
                     No products match your search.
                   </td>
                 </tr>
@@ -189,6 +196,24 @@ export default function AdminProductsPage() {
                       <span className="rounded-lg bg-secondary/10 px-2.5 py-1 font-mono text-xs font-semibold text-secondary">
                         {item.productId}
                       </span>
+                    </td>
+
+                    {/* Image Preview */}
+                    <td className="px-6 py-4">
+                      {item.images && item.images.length > 0 ? (
+                        <img 
+                          src={item.images[0]} 
+                          alt={item.productName}
+                          className="h-12 w-12 rounded-lg object-cover ring-2 ring-primary/20"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/48?text=No+Image';
+                          }}
+                        />
+                      ) : (
+                        <div className="h-12 w-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                          <span className="text-xs text-secondary/40">No img</span>
+                        </div>
+                      )}
                     </td>
 
                     {/* Name + alt */}
@@ -252,6 +277,15 @@ export default function AdminProductsPage() {
                         />
                         {item.isVisible ? "Visible" : "Hidden"}
                       </span>
+                    </td>
+                    <td className="h-full px-6 py-4 flex items-center gap-4">
+                        <Link 
+                          to="/admin/products/update-product"
+                          state={item}
+                        >
+                          <FiEdit className="text-secondary hover:text-accent" />
+                        </Link>
+                        <DeleteModel product={item} setRefresh={setRefresh}/> 
                     </td>
                   </tr>
                 ))

@@ -6,6 +6,7 @@ import AdminOrdersPage from './admin/adminOrdersPage.jsx';
 import AdminProductsPage from './admin/adminProductsPage.jsx';
 import AdminUsersPage from './admin/adminUsersPage.jsx';
 import AdminAddProduct from './admin/adminAddProductsPage.jsx';
+import AdminUpdateProduct from './admin/adminUpdateProductsPage.jsx';
 
 export default function AdminPage() {
     return(
@@ -22,6 +23,7 @@ export default function AdminPage() {
                     <Route path="/products" element={<AdminProductsPage />}/>
                     <Route path="/users" element={<AdminUsersPage />}/>
                     <Route path="/products/add-product" element={<AdminAddProduct/>}/>
+                    <Route path="/products/update-product" element={<AdminUpdateProduct/>}/>
                 </Routes>
             </div>
             

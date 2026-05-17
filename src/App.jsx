@@ -10,7 +10,7 @@ export default function App() {
     <div className="w-full h-screen">
         <Toaster position='top-right'/>
         <Routes>
-            <Route path="/" element={<HomePage/>}/>
+            <Route path="/*" element={<HomePage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/admin/*" element={<AdminPage/>}/>
             {/* <Route path="/" element={<Test/>}/> */}

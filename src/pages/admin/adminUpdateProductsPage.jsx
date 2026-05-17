@@ -1,30 +1,32 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { fileUpload } from "../../utils/media-upload";
-import Loader from "../../components/Loader";
 
-export default function AdminAddProduct() {
+export default function AdminUpdateProduct() {
     const navigate = useNavigate();
 
-    const [productId, setProductId] = useState("");
-    const [productName, setProductName] = useState("");
-    const [productDescription, setProductDescription] = useState("");
-    const [altName, setAltName] = useState("");
-    const [productPrice, setProductPrice] = useState("");
-    const [labelPrice, setLabelPrice] = useState("");
-    const [category, setCategory] = useState("");
-    const [isVissible, setIsVissible] = useState("true");
-    const [brand, setBrand] = useState("Standard");
-    const [model, setModel] = useState("Generic");
+    const location = useLocation();
+
+    const [productId, setProductId] = useState(location.state.productId);
+    const [productName, setProductName] = useState(location.state.productName);
+    const [productDescription, setProductDescription] = useState(location.state.productDescription);
+    const [altName, setAltName] = useState(location.state.altName?.join(",") || "");
+    const [productPrice, setProductPrice] = useState(location.state.productPrice);
+    const [labelPrice, setLabelPrice] = useState(location.state.labelPrice);
+    const [category, setCategory] = useState(location.state.category);
+    const [isVissible, setIsVissible] = useState(location.state.isVisible ? "true" : "false");
+    const [brand, setBrand] = useState(location.state.brand);
+    const [model, setModel] = useState(location.state.model);
     const [files, setFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    async function handleAddProduct() {
+    //console.log(location.state);
+
+    async function handleEditProduct() {
         try {
             setIsLoading(true);
-
             const token = localStorage.getItem("token");
 
             if (token == null) {
@@ -39,15 +41,18 @@ export default function AdminAddProduct() {
                 fileUploadPromisses[i] = fileUpload(files[i]);
             }
 
-            const imageUrls = await Promise.all(fileUploadPromisses);
+            let imageUrls = await Promise.all(fileUploadPromisses);
 
-            await axios.post(import.meta.env.VITE_API_URL + "/products", {
-                productId: productId,
+            if(imageUrls.length === 0){
+                imageUrls = location.state.images
+            }
+
+            await axios.put(import.meta.env.VITE_API_URL + "/products/" + productId, {
                 productName: productName,
                 productDescription: productDescription,
                 altName: altName.split(","),
-                productPrice: Number(productPrice),
-                labelPrice: Number(labelPrice),
+                productPrice: productPrice,
+                labelPrice: labelPrice,
                 category: category,
                 isVisible: isVissible === "true",
                 brand: brand,
@@ -58,14 +63,14 @@ export default function AdminAddProduct() {
                     Authorization: "Bearer " + token
                 }
             });
-            
-            toast.success("Product added successfully!");
+
+            toast.success("Product Updated successfully!");
 
             // Redirect to Admin/products
             navigate("/admin/products");
 
         } catch (error) {
-            toast.error(error?.response?.data?.message || "Failed to add product. Please try again.");
+            toast.error(error?.response?.data?.message || "Failed to upload product. Please try again.");
             return;
         } finally {
             setIsLoading(false);
@@ -91,7 +96,7 @@ export default function AdminAddProduct() {
                     </p>
 
                     <h1 className="mt-1 text-3xl font-bold text-secondary">
-                        Add Product
+                        Edit Product
                     </h1>
 
                     <p className="mt-2 text-sm text-secondary/60">
@@ -108,6 +113,7 @@ export default function AdminAddProduct() {
                                 placeholder="Ex: ID0001"
                                 className={inputClass}
                                 value={productId}
+                                disabled
                                 onChange={(e) => {
                                     setProductId(e.target.value);
                                 }}
@@ -271,7 +277,7 @@ export default function AdminAddProduct() {
 
                     <button
                         className="h-[48px] w-[150px] rounded-xl bg-secondary text-sm font-bold text-primary shadow-md transition hover:bg-accent hover:text-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                        onClick={handleAddProduct}
+                        onClick={handleEditProduct}
                         disabled={isLoading}
                     >
                         {isLoading ? (
@@ -280,10 +286,10 @@ export default function AdminAddProduct() {
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Adding...
+                                Updating...
                             </>
                         ) : (
-                            "Add Product"
+                            "Update Product"
                         )}
                     </button>
                 </div>
